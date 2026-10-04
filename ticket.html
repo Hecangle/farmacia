@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprobante de Venta - Farmacia</title>
+  <link rel="icon" type="image/x-icon" href="img/icono.ico">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background-color: #f1f5f9;
+      font-family: 'Courier New', Courier, monospace, sans-serif;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .ticket-box {
+      background: white;
+      width: 100%;
+      max-width: 380px;
+      padding: 1.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      color: #000;
+      font-size: 0.88rem;
+    }
+    .ticket-divider {
+      border-top: 1px dashed #000;
+      margin: 0.65rem 0;
+    }
+    .ticket-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0;
+    }
+    .ticket-table th, .ticket-table td {
+      padding: 0.25rem 0;
+      font-size: 0.82rem;
+    }
+    .ticket-table th {
+      border-bottom: 1px solid #000;
+      text-align: left;
+    }
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .ticket-box {
+        box-shadow: none !important;
+        border: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print" style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+  <button type="button" class="btn btn-primary" onclick="window.print()">
+    🖨️ Imprimir Ticket
+  </button>
+  <a href="ventas.html" class="btn btn-outline">
+    ← Volver a Ventas
+  </a>
+</div>
+
+<div class="ticket-box">
+  <div style="text-align: center;">
+    <h3 id="tkt_nombre_farmacia" style="font-size: 1.15rem; margin-bottom: 0.2rem; font-weight: 900;">Farmacia</h3>
+    <div>RIF: <span id="tkt_rif">J-40123456-7</span></div>
+    <div id="tkt_dir">Av. Principal</div>
+    <div>Teléfono: <span id="tkt_tel">0212-5551234</span></div>
+  </div>
+
+  <div class="ticket-divider"></div>
+
+  <div><strong>COMPROBANTE DE VENTA</strong></div>
+  <div>Factura N°: <strong id="tkt_codigo">FAC-0000</strong></div>
+  <div>Fecha: <span id="tkt_fecha">--/--/----</span></div>
+  <div>Cajero: <span id="tkt_cajero">Administrador</span></div>
+
+  <div class="ticket-divider"></div>
+
+  <div><strong>DATOS DEL CLIENTE:</strong></div>
+  <div>Nombre: <span id="tkt_cliente_nombre">Consumidor Final</span></div>
+  <div>Cédula: <span id="tkt_cliente_cedula">V-12345678</span></div>
+  <div id="tkt_box_telf" style="display: none;">Teléfono: <span id="tkt_cliente_tel"></span></div>
+
+  <div class="ticket-divider"></div>
+
+  <table class="ticket-table">
+    <thead>
+      <tr>
+        <th style="width: 35px;">Cant</th>
+        <th>Descripción</th>
+        <th style="text-align: right;">Total Bs.</th>
+      </tr>
+    </thead>
+    <tbody id="tkt_tbody_items">
+      <tr>
+        <td colspan="3" style="text-align: center; padding: 1rem;">Cargando comprobante...</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="ticket-divider"></div>
+
+  <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 850; margin: 0.4rem 0;">
+    <span>TOTAL A PAGAR:</span>
+    <span id="tkt_total_bs">Bs. 0,00</span>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #475569;">
+    <span>Equivalente en Divisa:</span>
+    <span id="tkt_total_usd">$ 0.00</span>
+  </div>
+  <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #475569;">
+    <span>Tasa de Cambio:</span>
+    <span id="tkt_tasa">Bs. 36,50 / $</span>
+  </div>
+  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 0.35rem;">
+    <span>Forma de Pago:</span>
+    <span id="tkt_metodo" style="font-weight: bold;">Punto de Venta</span>
+  </div>
+
+  <!-- Notas de pago y seriales de billetes si aplica -->
+  <div id="tkt_box_notas" style="display: none; font-size: 0.76rem; color: #000; margin-top: 0.35rem; padding: 0.35rem 0.45rem; border: 1px dashed #000; background: #fafafa; border-radius: 4px; text-align: left; line-height: 1.35;"></div>
+
+  <div class="ticket-divider"></div>
+
+  <div style="text-align: center; font-size: 0.8rem; margin-top: 0.75rem;">
+    <p>¡Gracias por su compra y cuidar su salud!</p>
+    <p style="margin-top: 0.2rem;">Conserve este comprobante para cualquier reclamo o garantía.</p>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/sql-wasm-binary.js"></script>
+<script src="libs/initial-db.js"></script>
+<script src="js/db.js"></script>
+<script src="js/ticket.js"></script>
+</body>
+</html>

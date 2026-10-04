@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Clientes - Farmacia</title>
+  <link rel="icon" type="image/x-icon" href="img/icono.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-clientes">
+
+<div id="navbar_container"></div>
+
+<main class="main-wrapper">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2 style="font-size: 1.65rem; font-weight: 850; color: #020617; margin: 0;">Gestión de Clientes y Pacientes</h2>
+      <p style="color: #334155; margin: 0.2rem 0 0 0; font-size: 0.95rem;">Registro de compradores habituales, cédula de identidad e historial de compras.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <a href="index.html" class="btn btn-outline" style="font-weight: 750; text-decoration: none;">
+        ← Menú Principal
+      </a>
+      <button type="button" class="btn btn-primary" onclick="abrirModalCliente()" style="font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>+ Nuevo Cliente</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- BUSCADOR -->
+  <div class="card" style="margin-bottom: 1.25rem; padding: 1rem 1.25rem;">
+    <div style="max-width: 480px;">
+      <label class="form-label" for="cli_buscar" style="font-weight: 750; font-size: 0.88rem;">🔍 Buscar Cliente por Cédula o Nombre:</label>
+      <input type="text" id="cli_buscar" class="form-control" placeholder="Escriba la cédula o nombre..." oninput="filtrarClientes()">
+    </div>
+  </div>
+
+  <!-- TABLA DE CLIENTES -->
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-weight: 800; color: #0f172a; font-size: 1rem;">Clientes Registrados (<span id="cli_total_contador">0</span>)</span>
+    </div>
+    <div class="table-container" style="margin: 0; border: none; border-radius: 0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 100px;">Cédula</th>
+            <th>Nombres y Apellidos</th>
+            <th style="width: 120px;">Teléfono</th>
+            <th>Dirección</th>
+            <th style="text-align: center; width: 90px;">Compras</th>
+            <th style="text-align: center; width: 110px;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cli_tabla_body">
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: #64748b;">
+              Cargando clientes...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL REGISTRO / EDICIÓN DE CLIENTE -->
+<div id="modal_cliente" class="modal-overlay" style="display: none;">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 id="modal_cli_titulo" style="margin: 0; font-size: 1.3rem;">👤 Registrar Cliente</h3>
+      <button type="button" class="btn-close" onclick="cerrarModalCliente()">✕</button>
+    </div>
+    <form id="form_cliente" onsubmit="guardarCliente(event)">
+      <input type="hidden" id="modal_cli_id" value="">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="input_cli_cedula">Cédula de Identidad (*):</label>
+          <input type="text" id="input_cli_cedula" class="form-control" placeholder="Ej: V-12345678" required style="font-weight: 750;">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="input_cli_nombres">Nombres (*):</label>
+            <input type="text" id="input_cli_nombres" class="form-control" placeholder="Ej: Carlos" required style="font-weight: 750;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input_cli_apellidos">Apellidos (*):</label>
+            <input type="text" id="input_cli_apellidos" class="form-control" placeholder="Ej: Mendoza" required style="font-weight: 750;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input_cli_telefono">Teléfono:</label>
+          <input type="text" id="input_cli_telefono" class="form-control" placeholder="Ej: 0414-1234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input_cli_direccion">Dirección de Domicilio:</label>
+          <input type="text" id="input_cli_direccion" class="form-control" placeholder="Ej: Urb. Los Samanes, Casa #4">
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-outline" onclick="cerrarModalCliente()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="font-weight: 800;">Guardar Cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL DE COMPRAS -->
+<div id="modal_historial" class="modal-overlay" style="display: none;">
+  <div class="modal-content" style="max-width: 680px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; font-size: 1.25rem;">📜 Historial de Compras del Cliente</h3>
+      <button type="button" class="btn-close" onclick="cerrarModalHistorial()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="historial_cliente_info" style="font-size: 1rem; color: #1e293b; margin-bottom: 1rem; font-weight: 700;"></div>
+      <div class="table-container" style="max-height: 350px; overflow-y: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Factura N°</th>
+              <th>Fecha y Hora</th>
+              <th>Método de Pago</th>
+              <th style="text-align: right;">Total Bs.</th>
+              <th style="text-align: right;">Total $</th>
+              <th style="text-align: center;">Ticket</th>
+            </tr>
+          </thead>
+          <tbody id="historial_tabla_body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+      <button type="button" class="btn btn-outline" onclick="cerrarModalHistorial()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/sql-wasm-binary.js"></script>
+<script src="libs/initial-db.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/clientes.js"></script>
+</body>
+</html>

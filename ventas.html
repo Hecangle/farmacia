@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punto de Venta (POS) - Farmacia</title>
+  <link rel="icon" type="image/x-icon" href="img/icono.ico">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pos-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .pos-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pos-search-box {
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .pos-table-card {
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .pos-checkout-card {
+      background: white;
+      border: 1.5px solid #cbd5e1;
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 1rem;
+    }
+    .search-results-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1.5px solid #0284c7;
+      border-radius: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin-top: 4px;
+    }
+    .search-result-item {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover {
+      background: #f0fdf4;
+    }
+  </style>
+</head>
+<body class="page-ventas">
+
+<div id="navbar_container"></div>
+
+<main class="main-wrapper">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2 style="font-size: 1.65rem; font-weight: 850; color: #020617; margin: 0;">Punto de Venta / Facturación</h2>
+      <p style="color: #334155; margin: 0.2rem 0 0 0; font-size: 0.95rem;">Escanee o busque medicamentos por código interno, nombre o laboratorio.</p>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <a href="index.html" class="btn btn-outline" style="font-weight: 750; text-decoration: none;">
+        ← Menú Principal
+      </a>
+      <button type="button" class="btn btn-danger" onclick="limpiarCarrito()" style="font-weight: 700;">
+        🗑️ Vaciar Carrito
+      </button>
+    </div>
+  </div>
+
+  <div class="pos-layout">
+    <!-- COLUMNA IZQUIERDA: CLIENTE, BÚSQUEDA Y CARRITO -->
+    <div>
+      
+      <!-- 1. APARTADO DE CLIENTE (BÚSQUEDA POR CÉDULA) -->
+      <div class="card-panel" style="margin-bottom: 1.25rem;">
+        <div class="card-panel-header">
+          <h3>
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="color: var(--primary);">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+            <span>Cliente / Paciente</span>
+          </h3>
+          <button type="button" class="btn btn-outline btn-sm" onclick="abrirModalNuevoCliente()" style="font-weight: 750;">
+            + Registrar Nuevo Cliente
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 0.5rem;">
+          <div style="flex: 1;">
+            <label class="form-label" for="pos_cedula" style="font-weight: 750;">Cédula de Identidad:</label>
+            <div style="position: relative;">
+              <input type="text" id="pos_cedula" class="form-control" placeholder="Escriba la cédula (ej: V-12345678)" autofocus autocomplete="off" oninput="onInputCedula(this.value)" onclick="if(this.value.trim()==='0')this.value='';" onfocus="if(this.value.trim()==='0'){this.value='';}else{this.select();}">
+              <span style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--gray-400); font-size: 0.8rem;">
+                Búsqueda automática
+              </span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary" onclick="buscarClientePorCedula()" style="font-weight: 750;">
+            Buscar
+          </button>
+        </div>
+
+        <!-- Aviso cuando el paciente no existe o no está registrado -->
+        <div id="cliente_no_encontrado_box" style="display: none;" class="cliente-no-encontrado">
+          <div>
+            <span id="no_encontrado_titulo_html">⚠️ <strong>No registrado</strong></span>
+            <div id="no_encontrado_desc_html" style="font-size: 0.82rem; color: #b45309; margin-top: 0.15rem;">No coincide con ningún cliente registrado. Pulse Registrar para agregarlo.</div>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" onclick="abrirRegistroConCedula()" style="font-weight: 750;">
+            ➕ Registrar
+          </button>
+        </div>
+
+        <!-- Datos del cliente encontrado -->
+        <div id="cliente_encontrado_box" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: var(--radius-md); padding: 0.95rem; margin-top: 0.6rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+            <div>
+              <span style="font-size: 0.75rem; color: #166534; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Cliente Seleccionado:</span>
+              <div id="cliente_nombre_completo" style="font-size: 1.15rem; font-weight: 850; color: #14532d; margin-top: 0.15rem;"></div>
+              <div style="font-size: 0.9rem; color: #166534; margin: 0.25rem 0; font-weight: 600;">
+                Cédula: <strong id="cliente_cedula_val"></strong> &bull; Teléfono: <span id="cliente_tel_val"></span>
+              </div>
+              <div id="cliente_compras_badge" class="cliente-badge-compras" style="margin-top: 0.35rem;">
+                🛍️ Ha realizado 0 compras
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline" onclick="quitarClienteSeleccionado()" style="color: #991b1b; border-color: #fecaca; font-weight: 750;">
+              Cambiar
+            </button>
+          </div>
+        </div>
+
+        <input type="hidden" id="pos_cliente_id" value="">
+      </div>
+
+      <!-- 2. APARTADO DE AGREGAR MEDICAMENTOS (BÚSQUEDA) -->
+      <div class="card-panel" style="margin-bottom: 1.25rem;">
+        <div class="card-panel-header">
+          <h3>
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" style="color: var(--secondary);">
+              <path d="M4.5 10.5C3.67 10.5 3 11.17 3 12s.67 1.5 1.5 1.5h15c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5h-15z"/>
+            </svg>
+            <span>Agregar Medicamentos a Vender</span>
+          </h3>
+          <span style="font-size: 0.85rem; color: var(--gray-600); font-weight: 600;">Precios calculados en Bs.</span>
+        </div>
+
+        <div class="pos-search-box" style="position: relative;">
+          <input type="text" id="pos_buscar_med" class="form-control" placeholder="Buscar por código interno (ej: MED-0001) o nombre del medicamento..." autocomplete="off" oninput="buscarMedicamentosPos(this.value)">
+          <div id="pos_dropdown_resultados" class="search-results-dropdown" style="display: none;"></div>
+        </div>
+        <p class="form-hint" style="margin-top: 0.35rem; font-size: 0.82rem; color: #64748b;">
+          Escriba el nombre o código interno del fármaco y selecciónelo para añadirlo a la factura.
+        </p>
+      </div>
+
+      <!-- 3. TABLA DEL CARRITO -->
+      <div class="pos-table-card">
+        <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-bottom: 1px solid #cbd5e1; font-weight: 800; font-size: 1.05rem; color: #0f172a; display: flex; justify-content: space-between; align-items: center;">
+          <span>📦 Ítems en la Venta (<span id="pos_cant_items">0</span>)</span>
+          <span style="font-size: 0.88rem; color: #475569; font-weight: 600;">Precios calculados a la tasa actual</span>
+        </div>
+        <div class="table-container" style="margin: 0; border: none; border-radius: 0;">
+          <table class="data-table" id="tabla_carrito">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Medicamento</th>
+                <th style="text-align: right;">Precio $</th>
+                <th style="text-align: right;">Precio Bs.</th>
+                <th style="text-align: center; width: 140px;">Cantidad</th>
+                <th style="text-align: right;">Subtotal Bs.</th>
+                <th style="text-align: center; width: 60px;">Quitar</th>
+              </tr>
+            </thead>
+            <tbody id="pos_carrito_body">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 2.5rem; color: #64748b; font-weight: 600;">
+                  🛒 El carrito está vacío. Busque y seleccione medicamentos arriba para agregarlos a la venta.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: TOTALES Y MÉTODO DE PAGO -->
+    <div>
+      <div class="pos-checkout-card">
+
+        <!-- Totales Destacados -->
+        <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem; color: #334155; font-size: 0.95rem; font-weight: 650;">
+            <span>Equivalente en Divisa:</span>
+            <strong id="pos_total_usd_txt" style="color: #0f172a; font-size: 1.05rem;">$ 0.00</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: #475569; font-size: 0.85rem; font-weight: 600;">
+            <span>Tasa de Cambio:</span>
+            <span id="pos_tasa_txt">Bs. 36,50 / $</span>
+          </div>
+          <div style="border-top: 1.5px dashed #cbd5e1; padding-top: 0.65rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 850; font-size: 1.1rem; color: #020617;">TOTAL A PAGAR:</span>
+            <strong id="pos_total_bs_txt" style="font-size: 1.45rem; font-weight: 900; color: #047857;">Bs. 0,00</strong>
+          </div>
+        </div>
+
+        <!-- Forma de Pago -->
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="pos_metodo_pago" style="font-weight: 750; font-size: 0.92rem;">
+            💳 Método de Pago:
+          </label>
+          <select id="pos_metodo_pago" class="form-control" style="font-weight: 700; font-size: 0.98rem;" onchange="cambiarMetodoPago()">
+            <option value="Punto de Venta" selected>💳 Punto de Venta (Tarjeta Débito/Crédito)</option>
+            <option value="Efectivo Bs">💵 Efectivo Bolívares (Bs)</option>
+            <option value="Dólares Efectivo">💵 Dólares Efectivo ($ USD)</option>
+            <option value="Pago Móvil">📱 Pago Móvil</option>
+          </select>
+        </div>
+
+        <!-- Contenedor dinámico según forma de pago -->
+        <div id="pos_detalles_pago" style="margin-bottom: 1.25rem;"></div>
+
+        <!-- Botón Procesar Venta -->
+        <button type="button" id="btn_procesar_venta" class="btn btn-primary" onclick="procesarVentaPos()" style="width: 100%; padding: 0.95rem; font-size: 1.15rem; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 0.5rem;" disabled>
+          <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+          <span>Procesar Venta</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL VENTA EXITOSA -->
+<div id="modal_venta_exitosa" class="modal-overlay" style="display: none;">
+  <div class="modal-content" style="max-width: 460px; text-align: center;">
+    <div style="width: 68px; height: 68px; margin: 0 auto 1rem; background: #dcfce7; color: #15803d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; border: 2px solid #86efac;">
+      ✓
+    </div>
+    <h3 style="margin: 0 0 0.4rem 0; font-size: 1.4rem; color: #064e3b; font-weight: 850;">¡Venta Procesada con Éxito!</h3>
+    <p style="color: #334155; margin-bottom: 1rem; font-size: 0.95rem;">Comprobante de venta generado y registrado en la base de datos.</p>
+
+    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: left;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.95rem;">
+        <span style="color: #475569; font-weight: 600;">N° de Factura:</span>
+        <strong id="modal_exitosa_codigo" style="color: #0f172a; font-size: 1.05rem;">FAC-0000</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+        <span style="color: #475569; font-weight: 600;">Total Facturado:</span>
+        <strong id="modal_exitosa_total" style="color: #047857; font-size: 1.15rem;">Bs. 0,00</strong>
+      </div>
+    </div>
+
+    <!-- Vuelto si aplica -->
+    <div id="modal_exitosa_vuelto_box" style="display: none; background: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; font-size: 1.1rem; color: #064e3b; font-weight: 800;"></div>
+
+    <div style="display: flex; gap: 0.75rem;">
+      <button type="button" class="btn btn-outline" onclick="cerrarModalVentaExitosa()" style="flex: 1; font-weight: 750;">
+        ← Nueva Venta
+      </button>
+      <button type="button" class="btn btn-primary" onclick="imprimirTicketExitosa()" style="flex: 1.2; font-weight: 800;">
+        🖨️ Imprimir Ticket
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRO RÁPIDO DE CLIENTE -->
+<div id="modal_nuevo_cliente" class="modal-overlay" style="display: none;">
+  <div class="modal-content" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; font-size: 1.25rem;">👤 Registrar Nuevo Cliente</h3>
+      <button type="button" class="btn-close" onclick="cerrarModalNuevoCliente()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="cli_cedula">Cédula de Identidad (*):</label>
+        <input type="text" id="cli_cedula" class="form-control" placeholder="Ej: V-12345678" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="cli_nombres">Nombres (*):</label>
+          <input type="text" id="cli_nombres" class="form-control" placeholder="Ej: Juan Carlos" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cli_apellidos">Apellidos (*):</label>
+          <input type="text" id="cli_apellidos" class="form-control" placeholder="Ej: Pérez Gómez" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="cli_telefono">Teléfono:</label>
+          <input type="text" id="cli_telefono" class="form-control" placeholder="Ej: 0414-1234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cli_direccion">Dirección:</label>
+          <input type="text" id="cli_direccion" class="form-control" placeholder="Ej: Calle Principal #12">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+      <button type="button" class="btn btn-outline" onclick="cerrarModalNuevoCliente()">Cancelar</button>
+      <button type="button" class="btn btn-primary" onclick="guardarNuevoClientePos()">Guardar y Seleccionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/sql-wasm-binary.js"></script>
+<script src="libs/initial-db.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/ventas.js"></script>
+</body>
+</html>

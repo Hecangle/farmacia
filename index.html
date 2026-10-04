@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Principal - Farmacia</title>
+  <link rel="icon" type="image/x-icon" href="img/icono.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-index">
+
+<div id="navbar_container"></div>
+
+<main class="main-wrapper">
+  <div class="dashboard-welcome">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary-light); color: var(--primary-hover); padding: 0.45rem 1.15rem; border-radius: 9999px; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.75rem; border: 1.5px solid var(--primary-border);">
+      <span>🏪</span>
+      <span>Panel Principal del Sistema Farmacéutico (HTML + JS &amp; SQLite)</span>
+    </div>
+    <h2 id="dash_bienvenida">Bienvenido(a)</h2>
+    <p>Acceda de manera ágil a cada módulo del sistema mediante las fichas interactivas.</p>
+  </div>
+
+  <!-- CONSULTOR RÁPIDO DE PRECIOS Y STOCK -->
+  <div class="quick-search-container">
+    <div class="quick-search-box">
+      <div class="quick-search-icon">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input type="text" id="consultor_rapido_input" class="quick-search-input" placeholder="🔍 Consultar precio y existencia de medicamentos... (Nombre o código)" autocomplete="off">
+      <button type="button" class="quick-search-clear" id="consultor_btn_limpiar" style="display: none;" onclick="limpiarConsultorRapido()" title="Limpiar búsqueda">✕</button>
+    </div>
+    
+    <!-- Contenedor flotante de resultados -->
+    <div id="consultor_resultados_dropdown" class="quick-search-dropdown"></div>
+  </div>
+
+  <!-- BARRA DE KPIS RÁPIDOS -->
+  <div class="kpi-strip">
+    <div class="kpi-box">
+      <div class="kpi-icon green">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <h4>Ventas de Hoy</h4>
+        <div id="kpi_ventas_bs" class="kpi-value">Bs. 0,00</div>
+        <small id="kpi_ventas_sub" style="color: #1e293b; font-weight: 750; font-size: 0.92rem;">0 ventas ($ 0.00)</small>
+      </div>
+    </div>
+
+    <div class="kpi-box">
+      <div class="kpi-icon blue">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <h4>Catálogo Fármacos</h4>
+        <div id="kpi_total_meds" class="kpi-value">0 registrados</div>
+        <small id="kpi_total_clientes" style="color: #1e293b; font-weight: 750; font-size: 0.92rem;">0 clientes activos</small>
+      </div>
+    </div>
+
+    <div class="kpi-box">
+      <div id="kpi_alerta_icon" class="kpi-icon green">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <h4>Alertas Stock Mínimo</h4>
+        <div id="kpi_stock_bajo" class="kpi-value" style="color: var(--primary-hover);">0 por reponer</div>
+        <small style="color: #1e293b; font-weight: 750; font-size: 0.92rem;">Límite &le; 3 unidades</small>
+      </div>
+    </div>
+
+    <div class="kpi-box">
+      <div class="kpi-icon yellow">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+      </div>
+      <div class="kpi-content">
+        <h4>Tasa Dólar del Día</h4>
+        <div id="kpi_tasa_dolar" class="kpi-value">Bs. 36,50</div>
+        <small id="kpi_margen_sub" style="color: #1e293b; font-weight: 750; font-size: 0.92rem;">Margen: 30%</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- FICHAS PRINCIPALES DEL SISTEMA -->
+  <div style="margin-top: 2.5rem;">
+    <div class="fichas-grid">
+      
+      <!-- FICHA 1: VENTAS (POS) -->
+      <a href="ventas.html" class="ficha-card ficha-ventas">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+            </svg>
+          </div>
+          <span class="ficha-badge green">Punto de Venta</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Facturación y Ventas</h3>
+          <p>Búsqueda rápida de medicamentos, carrito dinámico en Bolívares y Dólares, métodos de pago y emisión de tickets.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Facturar Medicamentos</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+      <!-- FICHA 2: INVENTARIO Y RECEPCIÓN -->
+      <a href="inventario.html" class="ficha-card ficha-inventario">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v3.01c0 .72.38 1.36.95 1.7L3 20c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2l.05-11.29c.57-.34.95-.98.95-1.7V4c0-1.1-.9-2-2-2zm-1 7.21l-.04 10.79H5.04L5 9.21l1.5-1.21h11l1.5 1.21zM4 6V4h16v2l-1.5 1.21H5.5L4 6z"/>
+            </svg>
+          </div>
+          <span class="ficha-badge purple">Entradas &amp; Kardex</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Inventario y Recepción</h3>
+          <p>Recepción de fármacos con buscador inteligente, registro de entradas, salidas y kardex de movimientos.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Gestionar Entradas &amp; Stock</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+      <!-- FICHA 3: CATÁLOGO DE MEDICAMENTOS -->
+      <a href="medicamentos.html" class="ficha-card ficha-medicinas">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 3h12v2H6zm11 3H7c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 9h-3v3h-2v-3H8v-2h3v-3h2v3h3v2z"/>
+            </svg>
+          </div>
+          <span id="badge_total_meds" class="ficha-badge blue">0 Fármacos</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Catálogo de Medicinas</h3>
+          <p>Códigos internos, laboratorios, formas farmacéuticas con opción "Otro", precios de compra y venta en $ y Bs.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Ver Catálogo Completo</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+      <!-- FICHA 4: CLIENTES -->
+      <a href="clientes.html" class="ficha-card ficha-clientes">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+          </div>
+          <span id="badge_total_clientes" class="ficha-badge yellow">0 Clientes</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Gestión de Clientes</h3>
+          <p>Registro de pacientes y clientes habituales, historial de compras realizadas y facturas emitidas.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Administrar Clientes</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+      <!-- FICHA 5: REPORTES -->
+      <a href="reportes.html" class="ficha-card ficha-reportes">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+            </svg>
+          </div>
+          <span class="ficha-badge red">Métricas &amp; Cierre</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Reportes y Finanzas</h3>
+          <p>Cierres de caja del día, estadísticas de ventas por métodos de pago, medicamentos más vendidos y utilidades.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Ver Métricas &amp; Cierres</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+      <!-- FICHA 6: CONFIGURACIÓN -->
+      <a href="configuracion.html" class="ficha-card ficha-config">
+        <div class="ficha-header">
+          <div class="ficha-icon-box">
+            <svg width="36" height="36" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+          </div>
+          <span class="ficha-badge blue">Ajustes &amp; DB</span>
+        </div>
+        <div class="ficha-body">
+          <h3>Configuración del Sistema</h3>
+          <p>Tasa de cambio del dólar, RIF, datos de ticket, usuarios, y exportar/importar archivo .db de SQLite.</p>
+        </div>
+        <div class="btn-card-action">
+          <span>Configurar Farmacia</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<!-- Scripts -->
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/sql-wasm-binary.js"></script>
+<script src="libs/initial-db.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

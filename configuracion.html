@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración del Sistema - Farmacia</title>
+  <link rel="icon" type="image/x-icon" href="img/icono.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-configuracion">
+
+<div id="navbar_container"></div>
+
+<main class="main-wrapper">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2 style="font-size: 1.65rem; font-weight: 850; color: #020617; margin: 0;">Configuración del Sistema</h2>
+      <p style="color: #334155; margin: 0.2rem 0 0 0; font-size: 0.95rem;">Ajustes de la farmacia, tasa de cambio, usuarios y respaldo de base de datos SQLite.</p>
+    </div>
+    <a href="index.html" class="btn btn-outline" style="font-weight: 750; text-decoration: none;">
+      ← Menú Principal
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+    <!-- COLUMNA IZQUIERDA: DATOS DE LA FARMACIA Y PARÁMETROS -->
+    <div class="card">
+      <h3 style="font-size: 1.25rem; font-weight: 850; color: #020617; margin-top: 0; margin-bottom: 1rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.5rem;">
+        🏪 Datos Comerciales y Parámetros
+      </h3>
+      <form id="form_config_general" onsubmit="guardarConfiguracionGeneral(event)">
+        <div class="form-group">
+          <label class="form-label" for="cfg_nombre">Nombre Comercial de la Farmacia (*):</label>
+          <input type="text" id="cfg_nombre" class="form-control" required style="font-weight: 750;">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="cfg_rif">N° de RIF (*):</label>
+            <input type="text" id="cfg_rif" class="form-control" required style="font-weight: 700;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cfg_telefono">Teléfono de Contacto (*):</label>
+            <input type="text" id="cfg_telefono" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cfg_direccion">Dirección Física (*):</label>
+          <input type="text" id="cfg_direccion" class="form-control" required>
+        </div>
+
+        <div class="form-row" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="cfg_tasa" style="color: #064e3b; font-weight: 800;">Tasa Dólar Oficial (Bs.):</label>
+            <input type="number" step="0.01" min="0.01" id="cfg_tasa" class="form-control" required style="font-weight: 850; font-size: 1.15rem;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="cfg_margen" style="color: #064e3b; font-weight: 800;">Margen Ganancia Predet. (%):</label>
+            <input type="number" step="1" min="0" id="cfg_margen" class="form-control" required style="font-weight: 850; font-size: 1.15rem;">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 800;">
+          💾 Guardar Parámetros de la Farmacia
+        </button>
+      </form>
+    </div>
+
+    <!-- COLUMNA DERECHA: RESPALDO DE BASE DE DATOS Y USUARIOS -->
+    <div>
+      <!-- Gestión de Base de Datos SQLite -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 850; color: #020617; margin-top: 0; margin-bottom: 0.6rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.5rem;">
+          🗄️ Motor SQLite y Respaldos
+        </h3>
+        <p style="color: #475569; font-size: 0.92rem; margin-bottom: 1rem;">
+          Toda la información se procesa y almacena con SQLite en su navegador. Puede exportar o importar el archivo <code>.db</code> en cualquier momento.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Exportar .db -->
+          <button type="button" class="btn btn-primary" onclick="descargarBaseDatos()" style="font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem;">
+            <span>📥 Exportar Copia de Seguridad (.db)</span>
+          </button>
+
+          <!-- Importar .db -->
+          <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 0.85rem; text-align: center;">
+            <label class="form-label" style="font-weight: 750; margin-bottom: 0.35rem; display: block;">Restaurar / Cargar Archivo .db:</label>
+            <input type="file" id="input_importar_db" accept=".db,.sqlite,.sqlite3" style="margin-bottom: 0.5rem; font-size: 0.9rem;" onchange="manejarImportacionArchivo(event)">
+            <small style="color: #64748b; display: block;">Al importar un archivo .db válido, reemplazará la base de datos actual.</small>
+          </div>
+
+          <!-- Resetear a fábrica -->
+          <button type="button" class="btn btn-outline" onclick="confirmarResetFabrica()" style="color: #b91c1c; border-color: #fca5a5; font-weight: 700; margin-top: 0.5rem;">
+            ⚠️ Restablecer Datos de Demostración Iniciales
+          </button>
+        </div>
+      </div>
+
+      <!-- Gestión de Usuarios -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 0.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 850; color: #020617; margin: 0;">
+            👥 Usuarios del Sistema
+          </h3>
+          <button type="button" class="btn btn-outline" onclick="abrirModalNuevoUsuario()" style="padding: 0.3rem 0.6rem; font-size: 0.85rem; font-weight: 750;">
+            + Crear Usuario
+          </button>
+        </div>
+
+        <div class="table-container" style="margin: 0;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th style="text-align: center; width: 60px;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="cfg_tbody_usuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL CREAR / EDITAR USUARIO -->
+<div id="modal_usuario" class="modal-overlay" style="display: none;">
+  <div class="modal-content" style="max-width: 440px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; font-size: 1.25rem;">👤 Registrar Usuario</h3>
+      <button type="button" class="btn-close" onclick="cerrarModalUsuario()">✕</button>
+    </div>
+    <form id="form_usuario" onsubmit="guardarUsuario(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="usr_usuario">Nombre de Usuario (Login) (*):</label>
+          <input type="text" id="usr_usuario" class="form-control" placeholder="Ej: cajero1" required style="font-weight: 750;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usr_nombre">Nombre Completo (*):</label>
+          <input type="text" id="usr_nombre" class="form-control" placeholder="Ej: María Rodríguez" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usr_password">Contraseña (*):</label>
+          <input type="password" id="usr_password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usr_rol">Rol en el Sistema (*):</label>
+          <select id="usr_rol" class="form-control" required style="font-weight: 700;">
+            <option value="cajero">Cajero(a) - Acceso a Ventas y Clientes</option>
+            <option value="admin">Administrador(a) - Acceso Total</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" class="btn btn-outline" onclick="cerrarModalUsuario()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" style="font-weight: 800;">Guardar Usuario</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="libs/sql-wasm.js"></script>
+<script src="libs/sql-wasm-binary.js"></script>
+<script src="libs/initial-db.js"></script>
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/configuracion.js"></script>
+</body>
+</html>
